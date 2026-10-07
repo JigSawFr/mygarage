@@ -1,17 +1,19 @@
-import { useEffect, useRef, useState, type ChangeEvent } from 'react'
+import { useEffect, useMemo, useRef, useState, type ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Info, FileText, Gauge, Shield, type LucideIcon } from 'lucide-react'
 import { toast } from 'sonner'
 import FormModalWrapper from '../FormModalWrapper'
-import { Button, Field, Input, Textarea } from '../ui'
+import { Button, Field, Input, Select, Textarea } from '../ui'
 import vehicleService from '../../services/vehicleService'
+import { countryOptions } from '../../constants/countries'
+import { useDateLocale } from '../../hooks/useDateLocale'
 import { str, emptyToNull } from '../../utils/formUtils'
 import type { Vehicle, VehicleUpdate } from '../../types/vehicle'
 
 /** The four Overview info cards that open this shared editor sidecar. */
 export type VehicleCardKey = 'basic' | 'details' | 'powertrain' | 'warranty'
 
-type FieldKind = 'text' | 'number' | 'multiline'
+type FieldKind = 'text' | 'number' | 'multiline' | 'date' | 'country'
 
 interface FieldSpec {
   /** Vehicle column — present on both the update and response schemas. */
@@ -44,6 +46,8 @@ function getCardConfig(card: VehicleCardKey): CardConfig {
           { key: 'make', label: 'edit.make', kind: 'text' },
           { key: 'model', label: 'edit.model', kind: 'text' },
           { key: 'license_plate', label: 'edit.licensePlate', kind: 'text' },
+          { key: 'registration_country', label: 'edit.registrationCountry', kind: 'country' },
+          { key: 'first_registration_date', label: 'edit.firstRegistrationDate', kind: 'date' },
           {
             key: 'exterior_color',
             label: 'detail.misc.exteriorColor',
@@ -151,6 +155,11 @@ export default function VehicleFieldsDrawer({
   onUpdated,
 }: VehicleFieldsDrawerProps) {
   const { t } = useTranslation('vehicles')
+  const locale = useDateLocale()
+  const countryChoices = useMemo(
+    () => [{ value: '', label: t('edit.registrationCountryNone') }, ...countryOptions(locale)],
+    [locale, t]
+  )
   const [form, setForm] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
   // Snapshot of the seeded values, so save can send only the fields the user
@@ -235,10 +244,12 @@ export default function VehicleFieldsDrawer({
                 <Field id={id} label={t(f.label)}>
                   {f.kind === 'multiline' ? (
                     <Textarea id={id} rows={2} value={value} onChange={set(f.key)} />
+                  ) : f.kind === 'country' ? (
+                    <Select id={id} value={value} onChange={set(f.key)} options={countryChoices} />
                   ) : (
                     <Input
                       id={id}
-                      type={f.kind === 'number' ? 'number' : 'text'}
+                      type={f.kind === 'number' ? 'number' : f.kind === 'date' ? 'date' : 'text'}
                       min={f.min}
                       max={f.max}
                       value={value}

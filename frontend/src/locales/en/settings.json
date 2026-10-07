@@ -11,7 +11,11 @@
   },
   "systemConfig": {
     "title": "System Configuration",
-    "description": "Configure core system settings like the timezone and garage sections."
+    "description": "Configure core system settings like the timezone and garage sections.",
+    "defaultCountry": "Default country",
+    "defaultCountryDesc": "Applies to everyone who has not chosen a country, and to vehicles without one of their own.",
+    "defaultCountrySaved": "Default country saved",
+    "defaultCountryError": "Failed to save the default country"
   },
   "timezone": {
     "label": "Timezone",
@@ -740,5 +744,12 @@
     "red": "Racing Red",
     "violet": "Violet",
     "green": "Green"
+  },
+  "country": {
+    "label": "Country",
+    "none": "Not set",
+    "saved": "Country saved",
+    "error": "Failed to save the country",
+    "description": "Drives national defaults for your vehicles: inspection cadence, fuel pump names, tax types. A vehicle registered elsewhere can set its own country."
   }
 }

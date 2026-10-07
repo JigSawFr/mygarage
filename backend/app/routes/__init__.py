@@ -5,6 +5,7 @@ from app.routes.analytics import router as analytics_router
 from app.routes.attachments import router as attachments_router
 from app.routes.backup import router as backup_router
 from app.routes.calendar import router as calendar_router
+from app.routes.country_profiles import router as country_profiles_router
 from app.routes.dashboard import router as dashboard_router
 from app.routes.def_routes import router as def_router
 from app.routes.documents import router as documents_router
@@ -84,6 +85,7 @@ __all__ = [
     "maintenance_rules_router",
     "maintenance_types_router",
     "reminder_packs_router",
+    "country_profiles_router",
     "service_visits_router",
     "supplies_router",
     "vehicle_supplies_router",
