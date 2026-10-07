@@ -2438,6 +2438,99 @@
         "title": "CategoryChange",
         "type": "object"
       },
+      "ComplianceResponse": {
+        "properties": {
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Country"
+          },
+          "euro_class": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Euro Class"
+          },
+          "euro_class_estimated": {
+            "default": false,
+            "title": "Euro Class Estimated",
+            "type": "boolean"
+          },
+          "inspection": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/InspectionStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lez": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/LezStatus"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "profile_country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Country"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "enum": [
+                  "no_country",
+                  "no_profile"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/ProfileSource"
+            },
+            "title": "Sources",
+            "type": "array"
+          },
+          "vin": {
+            "title": "Vin",
+            "type": "string"
+          }
+        },
+        "required": [
+          "vin"
+        ],
+        "title": "ComplianceResponse",
+        "type": "object"
+      },
       "CostAnalysis": {
         "description": "Overall cost analysis.",
         "properties": {
@@ -9435,6 +9528,103 @@
         "title": "InspectionSchedule",
         "type": "object"
       },
+      "InspectionStatus": {
+        "description": "The periodic inspection as the automatic engine (#211) tracks it.",
+        "properties": {
+          "anchor_kind": {
+            "anyOf": [
+              {
+                "enum": [
+                  "service",
+                  "completion",
+                  "baseline"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anchor Kind"
+          },
+          "automatic": {
+            "title": "Automatic",
+            "type": "boolean"
+          },
+          "from_registration": {
+            "default": false,
+            "title": "From Registration",
+            "type": "boolean"
+          },
+          "lead_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead Days"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "next_due_date": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Next Due Date"
+          },
+          "reminder_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reminder Id"
+          },
+          "rule_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rule Id"
+          },
+          "window_opens_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Window Opens On"
+          }
+        },
+        "required": [
+          "name",
+          "automatic"
+        ],
+        "title": "InspectionStatus",
+        "type": "object"
+      },
       "InspectionStep": {
         "additionalProperties": false,
         "description": "One step of a roadworthiness cadence.\n\nThe first step says when the first inspection is due (``first_after_years``\nafter first registration); every later step says how often it recurs\n(``every_years``) and, optionally, until what vehicle age that rhythm\napplies (``until_age_years``, exclusive). The next due date is the\nprevious one plus ``every_years`` of the first step whose ``until_age_years``\nis null or above the vehicle's age at the previous due date.",
@@ -10376,6 +10566,87 @@
           }
         },
         "title": "LezRules",
+        "type": "object"
+      },
+      "LezStatus": {
+        "description": "The country's low-emission scheme and the class this vehicle has in it.",
+        "properties": {
+          "basis": {
+            "anyOf": [
+              {
+                "enum": [
+                  "override",
+                  "euro_class",
+                  "first_registration",
+                  "fuel"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Basis"
+          },
+          "computed": {
+            "default": false,
+            "title": "Computed",
+            "type": "boolean"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "overridden": {
+            "default": false,
+            "title": "Overridden",
+            "type": "boolean"
+          },
+          "scheme": {
+            "enum": [
+              "critair",
+              "umweltplakette",
+              "lez_registration",
+              "ztl",
+              "dgt_label"
+            ],
+            "title": "Scheme",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "value": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Value"
+          }
+        },
+        "required": [
+          "scheme"
+        ],
+        "title": "LezStatus",
         "type": "object"
       },
       "LinkOIDCAccountRequest": {
@@ -26155,6 +26426,20 @@
             "description": "Brake fluid type (e.g. DOT 4)",
             "title": "Brake Fluid Type"
           },
+          "co2_g_km": {
+            "anyOf": [
+              {
+                "maximum": 999.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "CO\u2082 emissions in g/km, field V.7",
+            "title": "Co2 G Km"
+          },
           "color": {
             "anyOf": [
               {
@@ -26282,6 +26567,32 @@
             "description": "Drive type (FWD, RWD, AWD, etc.)",
             "title": "Drive Type"
           },
+          "eu_category": {
+            "anyOf": [
+              {
+                "maxLength": 5,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "EU vehicle category, field J (M1, N1, L3e)",
+            "title": "Eu Category"
+          },
+          "euro_emission_class": {
+            "anyOf": [
+              {
+                "maxLength": 12,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Euro emission class, field V.9 of an EU registration certificate (Euro 6d-TEMP)",
+            "title": "Euro Emission Class"
+          },
           "first_registration_date": {
             "anyOf": [
               {
@@ -26294,6 +26605,20 @@
             ],
             "description": "Date of first registration (field B of an EU registration certificate)",
             "title": "First Registration Date"
+          },
+          "fiscal_power": {
+            "anyOf": [
+              {
+                "maximum": 200.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "National fiscal power, field P.6 (French CV)",
+            "title": "Fiscal Power"
           },
           "fuel_filter_part_number": {
             "anyOf": [
@@ -26346,6 +26671,19 @@
             ],
             "description": "GVWR class",
             "title": "Gvwr Class"
+          },
+          "lez_class": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Low-emission-zone class set by hand (Crit'Air 0-5, Umweltplakette 2-4); overrides the class computed from the fuel and the Euro class",
+            "title": "Lez Class"
           },
           "license_plate": {
             "anyOf": [
@@ -26417,6 +26755,19 @@
             "description": "Model name",
             "title": "Model"
           },
+          "national_category": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "National vehicle kind, field J.1 (VP, CTTE, MTL)",
+            "title": "National Category"
+          },
           "nickname": {
             "description": "User-friendly display name",
             "maxLength": 100,
@@ -26467,6 +26818,20 @@
             ],
             "description": "Engine oil viscosity grade (e.g. 5W-30)",
             "title": "Oil Viscosity"
+          },
+          "power_kw": {
+            "anyOf": [
+              {
+                "maximum": 2000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Maximum net power in kW, field P.2",
+            "title": "Power Kw"
           },
           "purchase_date": {
             "anyOf": [
@@ -27410,6 +27775,18 @@
             "description": "Brake fluid type (e.g. DOT 4)",
             "title": "Brake Fluid Type"
           },
+          "co2_g_km": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "CO\u2082 emissions in g/km, field V.7",
+            "title": "Co2 G Km"
+          },
           "color": {
             "anyOf": [
               {
@@ -27563,6 +27940,30 @@
             ],
             "title": "Environmental Rating Smog"
           },
+          "eu_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "EU vehicle category, field J (M1, N1, L3e)",
+            "title": "Eu Category"
+          },
+          "euro_emission_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Euro emission class, field V.9 of an EU registration certificate (Euro 6d-TEMP)",
+            "title": "Euro Emission Class"
+          },
           "exterior_color": {
             "anyOf": [
               {
@@ -27586,6 +27987,18 @@
             ],
             "description": "Date of first registration (field B of an EU registration certificate)",
             "title": "First Registration Date"
+          },
+          "fiscal_power": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "National fiscal power, field P.6 (French CV)",
+            "title": "Fiscal Power"
           },
           "fuel_economy_city_l_per_100km": {
             "anyOf": [
@@ -27681,6 +28094,18 @@
               }
             ],
             "title": "Interior Color"
+          },
+          "lez_class": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Low-emission-zone class set by hand (Crit'Air 0-5, Umweltplakette 2-4); overrides the class computed from the fuel and the Euro class",
+            "title": "Lez Class"
           },
           "license_plate": {
             "anyOf": [
@@ -27795,6 +28220,18 @@
             ],
             "title": "Msrp Total"
           },
+          "national_category": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "National vehicle kind, field J.1 (VP, CTTE, MTL)",
+            "title": "National Category"
+          },
           "nickname": {
             "description": "User-friendly display name",
             "title": "Nickname",
@@ -27848,6 +28285,18 @@
               }
             ],
             "title": "Optional Equipment"
+          },
+          "power_kw": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Maximum net power in kW, field P.2",
+            "title": "Power Kw"
           },
           "purchase_date": {
             "anyOf": [
@@ -28906,6 +29355,20 @@
             "description": "Brake fluid type (e.g. DOT 4)",
             "title": "Brake Fluid Type"
           },
+          "co2_g_km": {
+            "anyOf": [
+              {
+                "maximum": 999.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "CO\u2082 emissions in g/km, field V.7",
+            "title": "Co2 G Km"
+          },
           "color": {
             "anyOf": [
               {
@@ -29051,6 +29514,32 @@
             "description": "Drive type (FWD, RWD, AWD, etc.)",
             "title": "Drive Type"
           },
+          "eu_category": {
+            "anyOf": [
+              {
+                "maxLength": 5,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "EU vehicle category, field J (M1, N1, L3e)",
+            "title": "Eu Category"
+          },
+          "euro_emission_class": {
+            "anyOf": [
+              {
+                "maxLength": 12,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Euro emission class, field V.9 of an EU registration certificate (Euro 6d-TEMP)",
+            "title": "Euro Emission Class"
+          },
           "exterior_color": {
             "anyOf": [
               {
@@ -29076,6 +29565,20 @@
             ],
             "description": "Date of first registration (field B of an EU registration certificate)",
             "title": "First Registration Date"
+          },
+          "fiscal_power": {
+            "anyOf": [
+              {
+                "maximum": 200.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "National fiscal power, field P.6 (French CV)",
+            "title": "Fiscal Power"
           },
           "fuel_filter_part_number": {
             "anyOf": [
@@ -29141,6 +29644,19 @@
             ],
             "description": "Interior color",
             "title": "Interior Color"
+          },
+          "lez_class": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Low-emission-zone class set by hand (Crit'Air 0-5, Umweltplakette 2-4); overrides the class computed from the fuel and the Euro class",
+            "title": "Lez Class"
           },
           "license_plate": {
             "anyOf": [
@@ -29266,6 +29782,19 @@
             "description": "MSRP total",
             "title": "Msrp Total"
           },
+          "national_category": {
+            "anyOf": [
+              {
+                "maxLength": 10,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "National vehicle kind, field J.1 (VP, CTTE, MTL)",
+            "title": "National Category"
+          },
           "nickname": {
             "anyOf": [
               {
@@ -29336,6 +29865,20 @@
             ],
             "description": "Optional equipment (category -> list of items)",
             "title": "Optional Equipment"
+          },
+          "power_kw": {
+            "anyOf": [
+              {
+                "maximum": 2000.0,
+                "minimum": 0.0,
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Maximum net power in kW, field P.2",
+            "title": "Power Kw"
           },
           "purchase_date": {
             "anyOf": [
@@ -43215,6 +43758,54 @@
         "summary": "Garage Assistant Chat",
         "tags": [
           "Garage Assistant"
+        ]
+      }
+    },
+    "/api/vehicles/{vin}/compliance": {
+      "get": {
+        "description": "The low-emission-zone class, the next periodic inspection and the Euro\nclass of the vehicle under its country's rules. Read-only; indicative.",
+        "operationId": "get_vehicle_compliance_api_vehicles__vin__compliance_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "vin",
+            "required": true,
+            "schema": {
+              "title": "Vin",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ComplianceResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Get Vehicle Compliance",
+        "tags": [
+          "compliance"
         ]
       }
     },
