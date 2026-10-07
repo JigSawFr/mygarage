@@ -15,6 +15,10 @@ vi.mock('../../hooks/queries/useTaxRecords', () => ({
 // useCurrencyPreference — the SAME deterministic mock T4/T6 use — to break the chain to useAuth; without
 // it the suite throws `useAuth must be used within an AuthProvider` before reaching any assertion.
 vi.mock('../../hooks/useCurrencyPreference', () => ({ useCurrencyPreference: () => ({ currencyCode: 'USD', locale: 'en-US', formatCurrency: vi.fn() }) }))
+// #211: the type select reads the vehicle's country profile; none here.
+vi.mock('../../hooks/useResolvedCountry', () => ({ useResolvedCountry: () => null }))
+vi.mock('../../hooks/queries/useCountryProfile', () => ({ useCountryProfile: () => ({ data: undefined }) }))
+vi.mock('../../services/api', () => ({ default: { get: vi.fn().mockResolvedValue({ data: {} }) } }))
 
 import TaxRecordForm from '../TaxRecordForm'
 
@@ -26,7 +30,7 @@ describe('TaxRecordForm — routing + exact payload (SDQ-C)', () => {
     render(<TaxRecordForm vin="V1" onClose={vi.fn()} onSuccess={vi.fn()} />)
     await user.clear(screen.getByLabelText('tax.datePaid *'))
     await user.type(screen.getByLabelText('tax.datePaid *'), '2026-03-01')
-    await user.selectOptions(screen.getByLabelText('taxRecordForm.type'), 'Registration')
+    await user.selectOptions(screen.getByLabelText('taxRecordForm.type'), 'registration')
     await user.clear(screen.getByLabelText('common:amount *'))
     await user.type(screen.getByLabelText('common:amount *'), '85.50')
     // renewal_date is an optional date whose default is '' — fill a valid date so the date schema
@@ -42,7 +46,7 @@ describe('TaxRecordForm — routing + exact payload (SDQ-C)', () => {
     expect(payload).toStrictEqual({
       vin: 'V1',
       date: '2026-03-01',
-      tax_type: 'Registration',
+      tax_type: 'registration',
       amount: 85.5,
       renewal_date: '2027-03-01',
       notes: 'note',
@@ -70,7 +74,8 @@ describe('TaxRecordForm — routing + exact payload (SDQ-C)', () => {
       id: 6,
       vin: 'V1',
       date: '2026-01-10',
-      tax_type: 'Inspection',
+      // The record carried the pre-128 spelling; the form reads it as its code.
+      tax_type: 'inspection',
       amount: 75.25,
       renewal_date: '2027-01-10',
       notes: 'y',
@@ -96,7 +101,7 @@ describe('TaxRecordForm — amount field on NumberInput (Task 8)', () => {
 
     await user.clear(screen.getByLabelText('tax.datePaid *'))
     await user.type(screen.getByLabelText('tax.datePaid *'), '2026-03-01')
-    await user.selectOptions(screen.getByLabelText('taxRecordForm.type'), 'Registration')
+    await user.selectOptions(screen.getByLabelText('taxRecordForm.type'), 'registration')
     // renewal_date defaults to '' (not undefined), which fails makeDateSchema's
     // min(1) even though the field is .optional() — same edge the pre-existing
     // create test above deliberately avoids by filling it.
@@ -114,7 +119,7 @@ describe('TaxRecordForm — amount field on NumberInput (Task 8)', () => {
     render(<TaxRecordForm vin="V1" onClose={vi.fn()} onSuccess={vi.fn()} />)
     await user.clear(screen.getByLabelText('tax.datePaid *'))
     await user.type(screen.getByLabelText('tax.datePaid *'), '2026-03-01')
-    await user.selectOptions(screen.getByLabelText('taxRecordForm.type'), 'Registration')
+    await user.selectOptions(screen.getByLabelText('taxRecordForm.type'), 'registration')
     await user.type(screen.getByLabelText('common:amount *'), 'abc')
     await user.click(screen.getByRole('button', { name: 'common:create' }))
 
