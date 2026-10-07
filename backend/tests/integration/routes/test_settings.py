@@ -60,6 +60,9 @@ class TestSettingsRoutes:
                 "llm_receipt_parse_enabled",
                 "llm_garage_assistant_enabled",
                 "default_unit_prefs",
+                # The country a client without a user resolves its national
+                # defaults from (#211): a preference, not a credential.
+                "default_country",
                 # Computed per request from the household-zone fallback chain,
                 # never a stored row (every write path rejects the key).
                 "effective_timezone",

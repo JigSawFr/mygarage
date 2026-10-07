@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Country as a setting (#211): a country per person (Quick Settings), an optional registration country and first registration date per vehicle, and an instance default (Settings → System). Country profiles are data files (`docs/country-profiles.md`): an EU baseline plus France, Luxembourg, Germany, Belgium, Italy, the Netherlands and Spain, served by `GET /api/country-profiles`. Nothing changes until a country is set.
+
 ### Changed
 - French translation completed (69% → 96%; the rest is identical to English on purpose) and revised: French typography (’, no-break spaces before : ; ? !, …), vouvoiement, « compteur » for the odometer, « rappel constructeur » for safety recalls, « badge de péage » for toll tags, « Réglages » for the settings screen
 - CI splits the test suites across parallel runners (shared-workflows v1.7.0)
