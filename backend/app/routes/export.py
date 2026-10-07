@@ -81,8 +81,11 @@ limiter = Limiter(key_func=get_remote_address)
 #   catalogue, migration 108) in place of the `coverage_limits` text box. The
 #   CSV keeps its `Coverage Limits` column, now rendered from those rows and
 #   read back through the same parser, so its shape and version are unchanged.
-CSV_SCHEMA_VERSION = "7"
-JSON_SCHEMA_VERSION = "8"
+# - CSV "8" / JSON "9": additive `Fuel Grade` column / `fuel_grade` key, the
+#   EN 16942 pump label of a fill-up (#211, migration 126). Same additive
+#   treatment as the #164 grade columns: an older file imports with NULLs.
+CSV_SCHEMA_VERSION = "8"
+JSON_SCHEMA_VERSION = "9"
 EXPORT_UNITS = "metric"
 
 
@@ -301,6 +304,7 @@ async def export_fuel_records_csv(
         "Fuel Type Used",
         "Octane",
         "Diesel Grade",
+        "Fuel Grade",
         "Station ID",
         "Station",
         "Driver ID",
@@ -348,6 +352,7 @@ async def export_fuel_records_csv(
                 # not a unit-bearing quantity, so no csv_emission conversion.
                 record.octane if record.octane is not None else "",
                 record.diesel_grade or "",
+                record.fuel_grade or "",
                 record.station_address_book_id or "",
                 station_names.get(record.id) or "",
                 record.driver_user_id or "",
@@ -919,6 +924,7 @@ async def export_vehicle_json(
                 "fuel_type_used": r.fuel_type_used,
                 "octane": r.octane,
                 "diesel_grade": r.diesel_grade,
+                "fuel_grade": r.fuel_grade,
                 "notes": r.notes,
             }
             for r in fuel_records

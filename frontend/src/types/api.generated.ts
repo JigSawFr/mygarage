@@ -10555,6 +10555,11 @@ export interface components {
              */
             filled_at?: string | null;
             /**
+             * Fuel Grade
+             * @description EN 16942 pump label of the fuel dispensed (E5, E10, E85, B7, B10, XTL, LPG, CNG…)
+             */
+            fuel_grade?: string | null;
+            /**
              * Fuel Type Used
              * @description Actual fuel dispensed for this fill-up (canonical enum). Only surfaced in UI when the vehicle has a secondary fuel capability.
              */
@@ -10813,6 +10818,11 @@ export interface components {
              */
             filled_at?: string | null;
             /**
+             * Fuel Grade
+             * @description EN 16942 pump label of the fuel dispensed (E5, E10, E85, B7, B10, XTL, LPG, CNG…)
+             */
+            fuel_grade?: string | null;
+            /**
              * Fuel Type Used
              * @description Actual fuel dispensed for this fill-up (canonical enum). Only surfaced in UI when the vehicle has a secondary fuel capability.
              */
@@ -11009,6 +11019,11 @@ export interface components {
              * @description Optional fill-up timestamp
              */
             filled_at?: string | null;
+            /**
+             * Fuel Grade
+             * @description EN 16942 pump label of the fuel dispensed (E5, E10, E85, B7, B10, XTL, LPG, CNG…)
+             */
+            fuel_grade?: string | null;
             /**
              * Fuel Type Used
              * @description Actual fuel dispensed (canonical enum)
@@ -19921,6 +19936,8 @@ export interface components {
             date?: string | null;
             /** Diesel Grade */
             diesel_grade?: string | null;
+            /** Fuel Grade */
+            fuel_grade?: string | null;
             /** Fuel Type Used */
             fuel_type_used?: string | null;
             /**

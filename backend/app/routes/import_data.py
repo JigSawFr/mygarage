@@ -74,6 +74,7 @@ from app.schemas.fuel import (
     PRICE_BASIS_VALUES,
     FuelRecordCreate,
     _validate_diesel_grade,
+    _validate_fuel_grade,
     _validate_octane,
 )
 from app.schemas.hours import HoursRecordCreate
@@ -980,6 +981,8 @@ async def import_fuel_csv(
             octane = _validate_octane(int(raw_octane)) if raw_octane else None
             raw_grade = (row.get("Diesel Grade", "") or "").strip()
             diesel_grade = _validate_diesel_grade(raw_grade) if raw_grade else None
+            # #211 — EN 16942 label (v8 column; absent/blank = NULL).
+            fuel_grade = _validate_fuel_grade(row.get("Fuel Grade", ""))
 
             # Check for duplicates if requested
             if skip_duplicates:
@@ -1018,6 +1021,7 @@ async def import_fuel_csv(
                 ),
                 octane=octane,
                 diesel_grade=diesel_grade,
+                fuel_grade=fuel_grade,
                 outside_temp_c=outside_temp_c,
                 obc_l_per_100km=obc_l_per_100km,
                 obc_avg_speed_kmh=obc_avg_speed_kmh,
@@ -1873,6 +1877,7 @@ async def import_vehicle_json(
                 # the way a bare int() would (91.9 -> 91; codex review R1-M1).
                 octane=_validate_octane(_coerce_octane(record_data.get("octane"))),
                 diesel_grade=_validate_diesel_grade(record_data.get("diesel_grade")),
+                fuel_grade=_validate_fuel_grade(record_data.get("fuel_grade")),
                 notes=record_data.get("notes"),
             )
             # A savepoint per row. Leaving it flushes the insert, so the next
