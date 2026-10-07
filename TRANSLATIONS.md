@@ -8,15 +8,15 @@ MyGarage supports multiple languages through community contributions.
 |---|----------|------|----------|------|
 | 🇺🇸 | English | `en` | `████████████████████` 100% | 4463/4463 |
 | 🇮🇹 | Italian | `it` | `███████████████████░` 97% | 4317/4463 |
+| 🇫🇷 | French | `fr` | `███████████████████░` 96% | 4270/4463 |
 | 🇲🇾 | Malay | `ms` | `███████████████████░` 96% | 4294/4463 |
 | 🇩🇪 | German | `de` | `████████████████░░░░` 79% | 3513/4463 |
-| 🇫🇷 | French | `fr` | `██████████████░░░░░░` 69% | 3059/4463 |
 | 🇷🇺 | Russian | `ru` | `███████░░░░░░░░░░░░░` 35% | 1551/4463 |
 | 🇺🇦 | Ukrainian | `uk` | `███████░░░░░░░░░░░░░` 35% | 1550/4463 |
 | 🇵🇱 | Polish | `pl` | `███████░░░░░░░░░░░░░` 34% | 1533/4463 |
 | 🇧🇷 | Brazilian Portuguese | `pt-BR` | `███████░░░░░░░░░░░░░` 34% | 1526/4463 |
 
-**Overall: 60%** average completion across 8 translated languages — English is the source (100%)
+**Overall: 63%** average completion across 8 translated languages — English is the source (100%)
 
 ---
 
