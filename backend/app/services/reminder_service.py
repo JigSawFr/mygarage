@@ -908,6 +908,31 @@ async def check_due_reminders(db: AsyncSession) -> None:
         if last_notified_at and (now - last_notified_at) < NOTIFICATION_COOLDOWN:
             continue
 
+        # #211 — a rule with a lead window (the French contrôle technique may
+        # be done six months early) sends ONE notification when that window
+        # opens, then the ordinary due-date one. The due-soon status keeps
+        # its own 30-day horizon: six months of amber badge would be noise.
+        if _inspection_window_opens(reminder, today):
+            try:
+                await dispatcher.dispatch(
+                    event_type="reminder_due",
+                    title=f"Inspection window open: {reminder.title}",
+                    message=_build_window_message(reminder, today),
+                )
+                reminder.last_notified_at = now.replace(tzinfo=None)
+                logger.info(
+                    "Sent inspection window notification for reminder %s (vin=%s)",
+                    reminder.id,
+                    sanitize_for_log(reminder.vin),
+                )
+            except Exception as e:
+                logger.error(
+                    "Failed to send inspection window notification %s: %s",
+                    reminder.id,
+                    sanitize_for_log(e),
+                )
+            continue
+
         should_notify = False
 
         # Date-based check
@@ -998,6 +1023,38 @@ async def check_due_reminders(db: AsyncSession) -> None:
                 )
 
     await db.commit()
+
+
+def window_opens_on(reminder: Reminder) -> date | None:
+    """The first day the work may be done: due date minus the rule's lead days."""
+    rule = reminder.rule
+    if rule is None or not rule.lead_days or reminder.due_date is None:
+        return None
+    return reminder.due_date - timedelta(days=rule.lead_days)
+
+
+def _inspection_window_opens(reminder: Reminder, today: date) -> bool:
+    """Whether today is inside the lead window and nothing was sent yet.
+
+    Once only: the window notification stamps `last_notified_at`, so the
+    next sweeps skip to the due-date rule. A reminder already notified for
+    any reason is never told about its window.
+    """
+    opens = window_opens_on(reminder)
+    if opens is None or reminder.last_notified_at is not None or reminder.due_date is None:
+        return False
+    return opens <= today < reminder.due_date
+
+
+def _build_window_message(reminder: Reminder, today: date) -> str:
+    opens = window_opens_on(reminder)
+    parts = [f"Inspection reminder: {reminder.title}"]
+    if opens is not None:
+        parts.append(f"Can be done from: {opens.isoformat()}")
+    if reminder.due_date:
+        parts.append(f"Due date: {reminder.due_date.isoformat()}")
+        parts.append(f"Days left: {(reminder.due_date - today).days}")
+    return "\n".join(parts)
 
 
 def _build_reminder_message(reminder: Reminder, ctx: RenderContext) -> str:

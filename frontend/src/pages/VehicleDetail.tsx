@@ -63,6 +63,7 @@ import LiveLinkSessionsTab from '../components/tabs/LiveLinkSessionsTab'
 import LiveLinkChartsTab from '../components/tabs/LiveLinkChartsTab'
 import LiveLinkTripsTab from '../components/tabs/LiveLinkTripsTab'
 import ReminderList from '../components/ReminderList'
+import InspectionScheduleNotice from '../components/InspectionScheduleNotice'
 import SubTabNav from '../components/SubTabNav'
 import VehicleHero from '../components/vehicle-detail/VehicleHero'
 import VehicleActionsToolbar from '../components/vehicle-detail/VehicleActionsToolbar'
@@ -731,7 +732,12 @@ export default function VehicleDetail() {
 
         {/* Tracking Sub-tabs */}
         {activePrimaryTab === 'tracking' && activeSubTab === 'notes' && vin && <NotesTab vin={vin} />}
-        {activePrimaryTab === 'tracking' && activeSubTab === 'reminders' && vin && <ReminderList vin={vin} />}
+        {activePrimaryTab === 'tracking' && activeSubTab === 'reminders' && vin && (
+          <>
+            <InspectionScheduleNotice vehicle={vehicle} />
+            <ReminderList vin={vin} />
+          </>
+        )}
         {activePrimaryTab === 'tracking' && activeSubTab === 'reports' && vin && <ReportsTab vin={vin} />}
 
         {/* Financial Sub-tabs */}

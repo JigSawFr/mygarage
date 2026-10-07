@@ -12855,6 +12855,8 @@ export interface components {
             interval_months: number | null;
             /** Is Active */
             is_active: boolean;
+            /** Lead Days */
+            lead_days?: number | null;
             /** Maintenance Type */
             maintenance_type: string | null;
             /** Notes */
@@ -12889,6 +12891,8 @@ export interface components {
             interval_months: number | null;
             /** Is Active */
             is_active: boolean;
+            /** Lead Days */
+            lead_days?: number | null;
             /** Maintenance Type */
             maintenance_type: string | null;
             /** Source */
@@ -14539,6 +14543,8 @@ export interface components {
             rule_id?: number | null;
             /** Snoozed Until */
             snoozed_until?: string | null;
+            /** Source */
+            source?: string | null;
             /** Status */
             status: string;
             /** Superseded By Id */
