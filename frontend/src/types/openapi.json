@@ -12111,6 +12111,17 @@
             "title": "Is Active",
             "type": "boolean"
           },
+          "lead_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead Days"
+          },
           "maintenance_type": {
             "anyOf": [
               {
@@ -12256,6 +12267,17 @@
           "is_active": {
             "title": "Is Active",
             "type": "boolean"
+          },
+          "lead_days": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lead Days"
           },
           "maintenance_type": {
             "anyOf": [
@@ -16641,6 +16663,17 @@
               }
             ],
             "title": "Snoozed Until"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
           },
           "status": {
             "title": "Status",
