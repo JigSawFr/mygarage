@@ -14,6 +14,7 @@ import {
   makeNumericField,
 } from './shared'
 import {
+  FUEL_GRADE_VALUES,
   FUEL_TYPE_VALUES,
   PAYMENT_METHOD_VALUES,
   TRIP_TYPE_VALUES,
@@ -100,6 +101,9 @@ export const makeFuelRecordSchema = (t: TFunction, units: UnitSet) =>
       integerKey: 'common:validation.fuel.octaneInvalid',
     }),
     diesel_grade: optionalEnum(DIESEL_GRADE_VALUES),
+    // #211 — the EN 16942 pump label; the backend upper-cases and validates
+    // the same vocabulary.
+    fuel_grade: optionalEnum(FUEL_GRADE_VALUES),
     is_full_tank: z.boolean(),
     missed_fillup: z.boolean(),
     is_hauling: z.boolean(),

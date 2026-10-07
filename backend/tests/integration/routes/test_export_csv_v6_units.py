@@ -122,6 +122,7 @@ _FUEL_HEADERS_METRIC = [
     "Fuel Type Used",
     "Octane",
     "Diesel Grade",
+    "Fuel Grade",
     "Station ID",
     "Station",
     "Driver ID",
@@ -157,6 +158,7 @@ _FUEL_HEADERS_UK_IMPERIAL = [
     "Fuel Type Used",
     "Octane",
     "Diesel Grade",
+    "Fuel Grade",
     "Station ID",
     "Station",
     "Driver ID",
@@ -390,7 +392,7 @@ class TestMarkerDiscriminatesOnTheResolvedSet:
             headers, row = _read(response.text)
             assert headers == _FUEL_HEADERS_METRIC
             assert row["unit_system"] == "metric"
-            assert row["units_version"] == "7"
+            assert row["units_version"] == "8"
             assert row["Odometer (km)"] == "500.00"
             assert row["Volume (L)"] == "40.000"
             assert row["Price Per Unit (L)"] == "1.500"
@@ -683,7 +685,7 @@ class TestEveryUnitBearingPairEmitsTokenisedHeaders:
                 "Notes",
                 "Source",
             ]
-            assert row["units_version"] == "7"
+            assert row["units_version"] == "8"
             assert row["unit_system"] == "metric"
             assert row["Engine Hours"] == "77.7"
         finally:
