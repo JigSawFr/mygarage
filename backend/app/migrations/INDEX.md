@@ -139,3 +139,4 @@ migrations must swallow their own operational errors.
 | `127_add_rule_lead_days` | **FATAL** — Add vehicle_maintenance_rules.lead_days (#211). |
 | `128_tax_type_codes` | Tax types become codes (#211). |
 | `129_add_vehicle_eu_fields` | **FATAL** — Add the EU registration-certificate fields on vehicles (#211). |
+| `130_recall_sources` | **FATAL** — Recall sources (#211): where a recall came from, and its own identifier. |

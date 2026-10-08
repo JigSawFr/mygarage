@@ -395,7 +395,13 @@
     "alertCriticalBelowLow": "Critical must be below Low.",
     "saveAlerts": "Save alerts",
     "alertsSaved": "Alerts saved",
-    "saveAlertsAction": "save the alerts"
+    "saveAlertsAction": "save the alerts",
+    "rappelconso": "RappelConso (France)",
+    "rappelconsoDesc": "Recalls from the French government's product recall register, for vehicles registered in France.",
+    "enableRappelConso": "Enable RappelConso",
+    "enableRappelConsoDesc": "Matched on the make, the model and the production dates (the register has no VIN); every match is shown with its confidence and is never marked resolved automatically.",
+    "rappelconsoApiUrl": "RappelConso API URL",
+    "rappelconsoApiUrlDesc": "The records endpoint on data.economie.gouv.fr. Only change it if the dataset moves."
   },
   "notifications": {
     "loading": "Loading notification settings...",

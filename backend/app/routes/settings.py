@@ -42,6 +42,7 @@ from app.services.llm_client import (
     is_http_url,
 )
 from app.services.oidc import MASKED_SECRET_PLACEHOLDER, display_mask_secret
+from app.services.recalls.rappelconso import API_URL_SETTING as RAPPELCONSO_API_URL_SETTING
 from app.services.settings_init import SENSITIVE_SETTING_KEYS
 from app.services.settings_service import SettingsService
 from app.utils.default_unit_prefs import (
@@ -54,6 +55,7 @@ from app.utils.household_time import (
     household_zone,
 )
 from app.utils.logging_utils import sanitize_for_log
+from app.utils.url_validation import validate_data_economie_url
 
 logger = logging.getLogger(__name__)
 
@@ -164,6 +166,16 @@ def _reject_unwritable_value(key: str, value: str | None) -> None:
             status_code=422,
             detail=f"Setting '{key}' must be one of: {', '.join(LLM_PROVIDER_PRESETS)}",
         )
+    if key == RAPPELCONSO_API_URL_SETTING and value:
+        # The provider would fall back to the default and log an error on
+        # every check; say so at the write instead (#211).
+        try:
+            validate_data_economie_url(value)
+        except Exception as exc:  # noqa: BLE001 - SSRF or malformed, same answer
+            raise HTTPException(
+                status_code=422,
+                detail=f"Setting '{key}' must be an https URL on data.economie.gouv.fr",
+            ) from exc
     if key != DEFAULT_UNIT_PREFS_KEY:
         return
     try:

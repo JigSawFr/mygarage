@@ -11,13 +11,13 @@ const invalidateQueries = vi.fn()
 vi.mock('../../hooks/queries/useRecallRecords', () => ({
   useRecallRecords: (...a: unknown[]) => useRecallRecordsMock(...a),
   useDeleteRecallRecord: () => ({ mutate: deleteMutate, isPending: false, variables: undefined }),
-  useCheckNHTSA: () => ({ mutate: nhtsaMutate, isPending: false }),
+  useCheckRecalls: () => ({ mutate: nhtsaMutate, isPending: false }),
   useToggleRecallResolved: () => ({ mutate: toggleMutate, isPending: false }),
 }))
 vi.mock('@tanstack/react-query', () => ({ useQueryClient: () => ({ invalidateQueries }) }))
 vi.mock('../../services/api', () => ({ default: { get: vi.fn().mockResolvedValue({ data: { settings: [] } }) } }))
 vi.mock('../../hooks/useDateLocale', () => ({ useDateLocale: () => 'en-US' }))
-vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+vi.mock('sonner', () => ({ toast: { success: vi.fn(), error: vi.fn(), info: vi.fn(), warning: vi.fn() } }))
 
 import RecallList from '../RecallList'
 
@@ -102,5 +102,78 @@ describe('RecallList — resolved timestamp', () => {
     render(<RecallList {...PROPS} />)
     expect(screen.getByText('Mar 1, 2026')).toBeInTheDocument()
     expect(screen.queryByText(/Invalid Date/)).toBeNull()
+  })
+})
+
+
+describe('RecallList — recall sources (#211)', () => {
+  it('shows the source, the match confidence and a link to the notice for a RappelConso recall', () => {
+    useRecallRecordsMock.mockReturnValue({
+      data: {
+        recalls: [
+          {
+            ...active,
+            id: 2,
+            nhtsa_campaign_number: null,
+            source: 'rappelconso',
+            external_id: '2024-03-0123',
+            external_url: 'https://rappel.conso.gouv.fr/fiche-rappel/12345/Interne',
+            match_confidence: 95,
+          },
+        ],
+        total: 1,
+        active_count: 1,
+        resolved_count: 0,
+      },
+      isLoading: false,
+      error: null,
+    })
+    render(<RecallList {...PROPS} />)
+    expect(screen.getByTestId('recall-source')).toHaveTextContent('recallList.source.rappelconso')
+    expect(screen.getByTestId('recall-confidence')).toBeInTheDocument()
+    expect(screen.getByText('recallList.matchedByModel')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: /recallList.viewNotice/ })).toHaveAttribute(
+      'href',
+      'https://rappel.conso.gouv.fr/fiche-rappel/12345/Interne',
+    )
+  })
+
+  it('an NHTSA recall shows its source and no confidence chip', () => {
+    useRecallRecordsMock.mockReturnValue({
+      data: {
+        recalls: [{ ...active, source: 'nhtsa', external_id: '23V123000', external_url: null, match_confidence: 100 }],
+        total: 1,
+        active_count: 1,
+        resolved_count: 0,
+      },
+      isLoading: false,
+      error: null,
+    })
+    render(<RecallList {...PROPS} />)
+    expect(screen.getByTestId('recall-source')).toHaveTextContent('recallList.source.nhtsa')
+    expect(screen.queryByTestId('recall-confidence')).not.toBeInTheDocument()
+    expect(screen.queryByText('recallList.matchedByModel')).not.toBeInTheDocument()
+  })
+
+  it('« Check recalls » asks every source and reports what came back', async () => {
+    const { toast } = await import('sonner')
+    nhtsaMutate.mockImplementation((_arg: unknown, options: { onSuccess: (r: unknown) => void }) =>
+      options.onSuccess({ providers_checked: ['rappelconso'], new_count: 2, warnings: ['nhtsa: request failed'] }),
+    )
+    render(<RecallList {...PROPS} />)
+    fireEvent.click(screen.getByRole('button', { name: /recallList.checkAll/ }))
+    expect(nhtsaMutate).toHaveBeenCalled()
+    expect(toast.success).toHaveBeenCalledWith('recallList.checkAllSuccess')
+    expect(toast.warning).toHaveBeenCalledWith('recallList.checkAllWarning')
+  })
+
+  it('says so when no source covers the country', async () => {
+    const { toast } = await import('sonner')
+    nhtsaMutate.mockImplementation((_arg: unknown, options: { onSuccess: (r: unknown) => void }) =>
+      options.onSuccess({ providers_checked: [], new_count: 0, warnings: [] }),
+    )
+    render(<RecallList {...PROPS} />)
+    fireEvent.click(screen.getByRole('button', { name: /recallList.checkAll/ }))
+    expect(toast.info).toHaveBeenCalledWith('recallList.noProviderForCountry')
   })
 })
