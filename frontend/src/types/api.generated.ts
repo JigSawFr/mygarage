@@ -18369,6 +18369,11 @@ export interface components {
              */
             body_class?: string | null;
             /**
+             * Decode Quality
+             * @description full: make and model; partial: make only; wmi_only: the manufacturer from the VIN's first three characters; none: nothing
+             */
+            decode_quality?: ("full" | "partial" | "wmi_only" | "none") | null;
+            /**
              * Doors
              * @description Number of doors
              */
@@ -18416,6 +18421,11 @@ export interface components {
              */
             model?: string | null;
             /**
+             * Notes
+             * @description Why the answer is partial: eu_vin_no_model, year_unreliable, check_digit_not_applicable
+             */
+            notes?: string[];
+            /**
              * Plant City
              * @description Manufacturing plant city
              */
@@ -18425,6 +18435,11 @@ export interface components {
              * @description Manufacturing plant country
              */
             plant_country?: string | null;
+            /**
+             * Region
+             * @description Region of the first character (ISO 3780): AF, AS, EU, NA, OC, SA
+             */
+            region?: string | null;
             /**
              * Series
              * @description Vehicle series
@@ -18452,6 +18467,11 @@ export interface components {
              * @description The decoded VIN
              */
             vin: string;
+            /**
+             * Wmi Country
+             * @description Country of manufacture from the WMI (ISO 3166-1 alpha-2)
+             */
+            wmi_country?: string | null;
             /**
              * Year
              * @description Model year
