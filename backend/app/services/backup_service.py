@@ -25,6 +25,7 @@ from app.services.llm_client import (
     LLM_PROVIDER_PRESETS,
     is_http_url,
 )
+from app.services.recalls.rappelconso import API_URL_SETTING as RAPPELCONSO_API_URL_SETTING
 from app.services.settings_service import SettingsService
 from app.utils.default_unit_prefs import (
     DEFAULT_UNIT_PREFS_KEY,
@@ -32,6 +33,7 @@ from app.utils.default_unit_prefs import (
 )
 from app.utils.household_time import EFFECTIVE_TIMEZONE_KEY, TIMEZONE_SETTING_KEY
 from app.utils.logging_utils import sanitize_for_log
+from app.utils.url_validation import validate_data_economie_url
 
 logger = logging.getLogger(__name__)
 
@@ -513,6 +515,15 @@ class BackupService:
                         sanitize_for_log(key),
                     )
                     continue
+                if key == RAPPELCONSO_API_URL_SETTING and value:
+                    try:
+                        validate_data_economie_url(value)
+                    except Exception:  # noqa: BLE001 - SSRF or malformed, same answer
+                        logger.warning(
+                            "Skipping %s during restore: not an https URL on data.economie.gouv.fr",
+                            sanitize_for_log(key),
+                        )
+                        continue
 
                 # Update setting in database
                 await SettingsService.set(

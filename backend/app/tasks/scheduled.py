@@ -23,7 +23,6 @@ from app.models import (
     FuelRecord,
     InsurancePolicy,
     OdometerRecord,
-    Recall,
     ServiceVisit,
     User,
     Vehicle,
@@ -452,7 +451,7 @@ async def check_recalls_all_vehicles() -> None:
     queries NHTSA for each vehicle, inserts new recalls, and sends
     notifications for any newly discovered recalls.
     """
-    from app.services.nhtsa import NHTSAService
+    from app.services.recall_service import sync_vehicle_recalls
 
     async with AsyncSessionLocal() as db:
         await load_household_zone(db)
@@ -463,7 +462,6 @@ async def check_recalls_all_vehicles() -> None:
                 logger.info("NHTSA auto-check disabled, skipping")
                 return
 
-            nhtsa = NHTSAService()
             dispatcher = NotificationDispatcher(db)
 
             # Get all active vehicles
@@ -478,38 +476,11 @@ async def check_recalls_all_vehicles() -> None:
                         vehicle.nickname or f"{vehicle.year} {vehicle.make} {vehicle.model}"
                     )
 
-                    # Fetch recalls from NHTSA
-                    recalls_data = await nhtsa.get_vehicle_recalls(vehicle.vin, db)
-
-                    # Get existing campaign numbers for this vehicle
-                    existing_result = await db.execute(
-                        select(Recall.nhtsa_campaign_number).where(
-                            Recall.vin == vehicle.vin,
-                            Recall.nhtsa_campaign_number.isnot(None),
-                        )
-                    )
-                    existing_campaigns = {r[0] for r in existing_result.fetchall()}
-
-                    # Insert new recalls
-                    new_count = 0
-                    for recall_data in recalls_data:
-                        campaign_num = recall_data.get("nhtsa_campaign_number") or recall_data.get(
-                            "NHTSACampaignNumber"
-                        )
-                        if not campaign_num or campaign_num in existing_campaigns:
-                            continue
-
-                        recall = Recall(
-                            vin=vehicle.vin,
-                            nhtsa_campaign_number=campaign_num,
-                            component=recall_data.get("Component") or recall_data.get("component"),
-                            summary=recall_data.get("Summary") or recall_data.get("summary"),
-                            consequence=recall_data.get("Consequence")
-                            or recall_data.get("consequence"),
-                            remedy=recall_data.get("Remedy") or recall_data.get("remedy"),
-                        )
-                        db.add(recall)
-                        new_count += 1
+                    # Every source that covers the vehicle's country (#211):
+                    # NHTSA where no profile says otherwise, RappelConso in
+                    # France. Stores what is new and commits.
+                    outcome = await sync_vehicle_recalls(db, vehicle)
+                    new_count = outcome.new_count
 
                     if new_count > 0:
                         total_new += new_count
@@ -533,8 +504,10 @@ async def check_recalls_all_vehicles() -> None:
                         str(e),
                     )
 
-            # Update last check timestamp
-            await SettingsService.set(db, "nhtsa_last_check", utc_now().isoformat())
+            # Update last check timestamps (one pass covers every source)
+            stamp = utc_now().isoformat()
+            await SettingsService.set(db, "nhtsa_last_check", stamp)
+            await SettingsService.set(db, "rappelconso_last_check", stamp)
             await db.commit()
 
             logger.info(
