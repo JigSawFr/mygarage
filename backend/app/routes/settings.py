@@ -22,6 +22,7 @@ from app.models.settings import Setting
 from app.models.user import User
 from app.models.vehicle import Vehicle
 from app.schemas.settings import (
+    LlmTestResponse,
     POIProviderCreate,
     POIProviderUpdate,
     SettingCreate,
@@ -31,7 +32,15 @@ from app.schemas.settings import (
     SettingUpdate,
     SystemInfoResponse,
 )
+from app.services import llm_client
 from app.services.auth import get_current_admin_user
+from app.services.document_reader_service import reading_enabled as document_reading_enabled
+from app.services.llm_client import (
+    LLM_BASE_URL_SETTING,
+    LLM_PRESET_SETTING,
+    LLM_PROVIDER_PRESETS,
+    is_http_url,
+)
 from app.services.oidc import MASKED_SECRET_PLACEHOLDER, display_mask_secret
 from app.services.settings_init import SENSITIVE_SETTING_KEYS
 from app.services.settings_service import SettingsService
@@ -143,6 +152,18 @@ def _reject_unwritable_value(key: str, value: str | None) -> None:
                 status_code=422,
                 detail=f"Setting '{key}' must be an ISO 3166-1 alpha-2 country code",
             )
+    if key == LLM_BASE_URL_SETTING and value and not is_http_url(value):
+        # The client would POST to it verbatim; a bare host or a typo would
+        # fail every receipt parse and document read with an opaque 502.
+        raise HTTPException(
+            status_code=422,
+            detail=f"Setting '{key}' must be an http(s) URL",
+        )
+    if key == LLM_PRESET_SETTING and value and value not in LLM_PROVIDER_PRESETS:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Setting '{key}' must be one of: {', '.join(LLM_PROVIDER_PRESETS)}",
+        )
     if key != DEFAULT_UNIT_PREFS_KEY:
         return
     try:
@@ -186,6 +207,9 @@ async def get_public_settings(db: AsyncSession = Depends(get_db)):
         "imperial_gallon_standard",
         "llm_receipt_parse_enabled",
         "llm_garage_assistant_enabled",
+        # The document import cards show only when a vision model may read a
+        # photo; without it the same fields are typed by hand (#211).
+        "llm_document_reading_enabled",
         # Replaces imperial_gallon_standard for clients with no user: anonymous
         # visitors and every client on an auth_mode=none instance skip /auth/me,
         # so they have no user row to resolve units from (spec D5). Non-sensitive:
@@ -618,6 +642,36 @@ async def test_poi_provider(
             "valid": False,
             "message": "Test failed - check server logs for details",
         }
+
+
+@router.post("/test/llm", response_model=LlmTestResponse)
+async def test_llm_endpoint(
+    db: AsyncSession = Depends(get_db),
+    current_user: User | None = Depends(get_current_admin_user),
+) -> LlmTestResponse:
+    """Exercise the saved LLM settings once (admin only).
+
+    Sends a one-word text completion to ``llm_base_url`` with ``llm_model``
+    and, when document reading is enabled, a 64×64 image to the vision model,
+    so an operator sees "text OK / vision OK" (or the endpoint's own error)
+    before uploading a real document. Reads the stored settings: the card
+    saves first, then tests. Writes nothing.
+    """
+    result = await llm_client.probe(db, check_vision=await document_reading_enabled(db))
+    logger.info(
+        "LLM connection test: text=%s vision=%s model=%s",
+        result.text_ok,
+        result.vision_ok,
+        sanitize_for_log(result.model),
+    )
+    return LlmTestResponse(
+        valid=result.valid,
+        message=result.message,
+        text_ok=result.text_ok,
+        vision_ok=result.vision_ok,
+        model=result.model,
+        vision_model=result.vision_model,
+    )
 
 
 @router.get("/{key}", response_model=SettingResponse)

@@ -19,6 +19,12 @@ from zoneinfo import ZoneInfo
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services import restore_staging
+from app.services.llm_client import (
+    LLM_BASE_URL_SETTING,
+    LLM_PRESET_SETTING,
+    LLM_PROVIDER_PRESETS,
+    is_http_url,
+)
 from app.services.settings_service import SettingsService
 from app.utils.default_unit_prefs import (
     DEFAULT_UNIT_PREFS_KEY,
@@ -491,6 +497,22 @@ class BackupService:
                             sanitize_for_log(str(exc)),
                         )
                         continue
+
+                # Same rule as the settings routes (#211): the LLM client POSTs
+                # to this URL verbatim, and a preset outside the vocabulary
+                # would be a 422 through the API.
+                if key == LLM_BASE_URL_SETTING and value and not is_http_url(value):
+                    logger.warning(
+                        "Skipping %s during restore: not an http(s) URL",
+                        sanitize_for_log(key),
+                    )
+                    continue
+                if key == LLM_PRESET_SETTING and value and value not in LLM_PROVIDER_PRESETS:
+                    logger.warning(
+                        "Skipping %s during restore: unknown preset",
+                        sanitize_for_log(key),
+                    )
+                    continue
 
                 # Update setting in database
                 await SettingsService.set(

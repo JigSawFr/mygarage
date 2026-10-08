@@ -11767,6 +11767,57 @@
         "title": "LiveSensorReading",
         "type": "object"
       },
+      "LlmTestResponse": {
+        "description": "What ``POST /api/settings/test/llm`` reports (#211).\n\n``vision_ok`` is null when the vision check did not run, which is the case\nwhile document reading is off; ``valid`` is the single verdict the card's\nbutton colours on.",
+        "properties": {
+          "message": {
+            "description": "A sentence for the operator, the endpoint's error included",
+            "title": "Message",
+            "type": "string"
+          },
+          "model": {
+            "description": "The text model that was tested",
+            "title": "Model",
+            "type": "string"
+          },
+          "text_ok": {
+            "description": "The text completion with llm_model succeeded",
+            "title": "Text Ok",
+            "type": "boolean"
+          },
+          "valid": {
+            "description": "True when every check that ran succeeded",
+            "title": "Valid",
+            "type": "boolean"
+          },
+          "vision_model": {
+            "description": "The vision model that was (or would be) tested",
+            "title": "Vision Model",
+            "type": "string"
+          },
+          "vision_ok": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The vision completion succeeded; null when document reading is off",
+            "title": "Vision Ok"
+          }
+        },
+        "required": [
+          "valid",
+          "message",
+          "text_ok",
+          "model",
+          "vision_model"
+        ],
+        "title": "LlmTestResponse",
+        "type": "object"
+      },
       "LocationPointOut": {
         "description": "A single GPS breadcrumb point, coordinates as float for map rendering.",
         "properties": {
@@ -41723,6 +41774,33 @@
           }
         ],
         "summary": "Get System Info",
+        "tags": [
+          "Settings"
+        ]
+      }
+    },
+    "/api/settings/test/llm": {
+      "post": {
+        "description": "Exercise the saved LLM settings once (admin only).\n\nSends a one-word text completion to ``llm_base_url`` with ``llm_model``\nand, when document reading is enabled, a 64\u00d764 image to the vision model,\nso an operator sees \"text OK / vision OK\" (or the endpoint's own error)\nbefore uploading a real document. Reads the stored settings: the card\nsaves first, then tests. Writes nothing.",
+        "operationId": "test_llm_endpoint_api_settings_test_llm_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LlmTestResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Test Llm Endpoint",
         "tags": [
           "Settings"
         ]
