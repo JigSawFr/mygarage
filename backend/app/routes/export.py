@@ -84,8 +84,11 @@ limiter = Limiter(key_func=get_remote_address)
 # - CSV "8" / JSON "9": additive `Fuel Grade` column / `fuel_grade` key, the
 #   EN 16942 pump label of a fill-up (#211, migration 126). Same additive
 #   treatment as the #164 grade columns: an older file imports with NULLs.
-CSV_SCHEMA_VERSION = "8"
-JSON_SCHEMA_VERSION = "9"
+# - CSV "9" / JSON "10": additive `No-Claims Class` column / `no_claims_class`
+#   key on a vehicle's insurance row, the bonus-malus coefficient or class it
+#   is rated at (#211, migration 131). An older file imports with NULLs.
+CSV_SCHEMA_VERSION = "9"
+JSON_SCHEMA_VERSION = "10"
 EXPORT_UNITS = "metric"
 
 
@@ -689,6 +692,7 @@ async def export_insurance_csv(
         "Premium",
         "Premium Frequency",
         "Deductible",
+        "No-Claims Class",
         "Coverage Limits",
         "Notes",
     ]
@@ -709,6 +713,7 @@ async def export_insurance_csv(
                 f"{share:.2f}" if share is not None else "",
                 policy.premium_frequency or "",
                 f"{link.deductible:.2f}" if link.deductible is not None else "",
+                link.no_claims_class or "",
                 coverage_text(link.coverages),
                 link.notes or "",
             ]
@@ -983,6 +988,7 @@ async def export_vehicle_json(
                 "policy_type": link.policy_type,
                 "premium_share": _insurance_share(link),
                 "deductible": float(link.deductible) if link.deductible is not None else None,
+                "no_claims_class": link.no_claims_class,
                 "coverages": [
                     {
                         "coverage_key": c.coverage_key,

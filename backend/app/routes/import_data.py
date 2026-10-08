@@ -46,6 +46,7 @@ from sqlalchemy.orm import InstrumentedAttribute
 
 from app.config import settings
 from app.constants.fuel import FuelTypeEnum, normalize_fuel_type
+from app.constants.insurance import POLICY_TYPE_VALUES, clean_no_claims_class
 from app.constants.tax import is_tax_type, normalize_tax_type
 from app.database import get_db
 from app.models import (
@@ -450,6 +451,16 @@ def _insurance_amounts_within_api_bounds(row: dict[str, Any]) -> None:
             raise _ImportBoundError(f"{coverage.get('coverage_key')} {e.reason}") from e
 
 
+def _no_claims_class(value: Any) -> str | None:
+    """The no-claims class of an imported row, held to the API's shape (ten
+    characters of plain text, #211); anything else is dropped rather than
+    refused, since a backup is restored as a whole."""
+    cleaned = clean_no_claims_class(value)
+    if value and cleaned is None:
+        logger.warning("Import: no-claims class %s dropped", sanitize_for_log(value))
+    return cleaned
+
+
 def _grown_premium(total: Decimal, premium: Decimal) -> Decimal:
     """A policy's premium plus one more vehicle's. Each fits, the sum may not."""
     grown = total + premium
@@ -479,6 +490,12 @@ async def _import_insurance_row(
     """
     provider = (row["provider"] or "").strip()
     number = (row["policy_number"] or "").strip()
+    # No CHECK holds the policy type since migration 131 (#211): the importer
+    # refuses what the API's `PolicyType` would, as a row error.
+    if row["policy_type"] not in POLICY_TYPE_VALUES:
+        raise _InsuranceRowError(
+            f"Type {row['policy_type']!r} is not one of {', '.join(POLICY_TYPE_VALUES)}"
+        )
     # Importers build ORM rows directly, so the API schema's whole-cents rule
     # does not reach them: 0.005 + 0.005 adds up to a 0.01 premium here and is
     # then STORED as two 0.01 shares, which no longer fit it.
@@ -583,6 +600,7 @@ async def _import_insurance_row(
             policy_type=row["policy_type"],
             premium_share=premium,
             deductible=row["deductible"],
+            no_claims_class=_no_claims_class(row.get("no_claims_class")),
             notes=row["notes"],
             effective_to=row.get("effective_to"),
         )
@@ -1442,6 +1460,7 @@ async def import_insurance_csv(
                 "premium": parse_decimal(row.get("Premium", "")),
                 "premium_frequency": row.get("Premium Frequency", "").strip() or None,
                 "deductible": parse_decimal(row.get("Deductible", "")),
+                "no_claims_class": row.get("No-Claims Class", "").strip() or None,
                 "notes": row.get("Notes", "").strip() or None,
             }
             # The flat file has one Coverage Limits column: converted whole,
@@ -2135,6 +2154,7 @@ async def import_vehicle_json(
                 "premium": Decimal(str(premium)) if premium is not None else None,
                 "premium_frequency": entry.get("premium_frequency"),
                 "deductible": Decimal(str(deductible)) if deductible is not None else None,
+                "no_claims_class": entry.get("no_claims_class"),
                 "coverages": _coverages_from_rows(entry.get("coverages") or []),
                 "notes": entry.get("notes"),
                 "fields": entry.get("fields") or [],
