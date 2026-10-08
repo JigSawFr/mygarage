@@ -73,6 +73,7 @@ import VehicleMobileActionsSheet from '../components/vehicle-detail/VehicleMobil
 import VehicleKeyFacts from '../components/vehicle-detail/VehicleKeyFacts'
 import { livelinkService } from '../services/livelinkService'
 import WindowStickerUpload from '../components/WindowStickerUpload'
+import { RegistrationCertificateDrawer } from '../components/RegistrationCertificateImport'
 import VehicleRemoveModal from '../components/modals/VehicleRemoveModal'
 import VehicleTransferWizard from '../components/modals/VehicleTransferWizard'
 import VehicleSharingModal from '../components/modals/VehicleSharingModal'
@@ -96,7 +97,14 @@ type ImportSectionResult = {
   error_count: number
 }
 
-export type ModalType = 'remove' | 'transfer' | 'sharing' | 'windowSticker' | 'torqueSource' | null
+export type ModalType =
+  | 'remove'
+  | 'transfer'
+  | 'sharing'
+  | 'windowSticker'
+  | 'torqueSource'
+  | 'registrationCertificate'
+  | null
 export type PrimaryTabType = 'overview' | 'media' | 'maintenance' | 'fuel' | 'tracking' | 'financial' | 'livelink'
 export type SubTabType = 'photos' | 'documents' | 'service' | 'fuel' | 'def' | 'propane' | 'odometer' | 'hours' | 'notes' | 'warranties' | 'insurance' | 'tax' | 'tolls' | 'financing' | 'spotrentals' | 'suppliesused' | 'recalls' | 'reports' | 'reminders' | 'live' | 'dtcs' | 'sessions' | 'charts' | 'trips' | 'tires'
 
@@ -841,6 +849,19 @@ export default function VehicleDetail() {
           onDownloadWindowSticker={handleDownloadWindowSticker}
           onUploadWindowSticker={() => setOpenModal('windowSticker')}
           onManageTorqueSources={() => setOpenModal('torqueSource')}
+          onImportRegistrationCertificate={() => setOpenModal('registrationCertificate')}
+        />
+      )}
+
+      {/* Registration certificate import (#211), stacked over the edit sidecar */}
+      {openModal === 'registrationCertificate' && vin && (
+        <RegistrationCertificateDrawer
+          vin={vin}
+          onClose={() => setOpenModal(null)}
+          onImported={() => {
+            loadVehicle()
+            toast.success(t('registrationImport.importedToast'))
+          }}
         />
       )}
 
