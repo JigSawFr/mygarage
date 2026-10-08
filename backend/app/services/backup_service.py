@@ -19,6 +19,7 @@ from zoneinfo import ZoneInfo
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.services import restore_staging
+from app.services.fuel_prices.france import API_URL_SETTING as FUEL_PRICES_API_URL_SETTING
 from app.services.llm_client import (
     LLM_BASE_URL_SETTING,
     LLM_PRESET_SETTING,
@@ -515,7 +516,7 @@ class BackupService:
                         sanitize_for_log(key),
                     )
                     continue
-                if key == RAPPELCONSO_API_URL_SETTING and value:
+                if key in (RAPPELCONSO_API_URL_SETTING, FUEL_PRICES_API_URL_SETTING) and value:
                     try:
                         validate_data_economie_url(value)
                     except Exception:  # noqa: BLE001 - SSRF or malformed, same answer

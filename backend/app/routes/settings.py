@@ -35,6 +35,7 @@ from app.schemas.settings import (
 from app.services import llm_client
 from app.services.auth import get_current_admin_user
 from app.services.document_reader_service import reading_enabled as document_reading_enabled
+from app.services.fuel_prices.france import API_URL_SETTING as FUEL_PRICES_API_URL_SETTING
 from app.services.llm_client import (
     LLM_BASE_URL_SETTING,
     LLM_PRESET_SETTING,
@@ -166,7 +167,7 @@ def _reject_unwritable_value(key: str, value: str | None) -> None:
             status_code=422,
             detail=f"Setting '{key}' must be one of: {', '.join(LLM_PROVIDER_PRESETS)}",
         )
-    if key == RAPPELCONSO_API_URL_SETTING and value:
+    if key in (RAPPELCONSO_API_URL_SETTING, FUEL_PRICES_API_URL_SETTING) and value:
         # The provider would fall back to the default and log an error on
         # every check; say so at the write instead (#211).
         try:
