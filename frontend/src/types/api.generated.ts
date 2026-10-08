@@ -3823,6 +3823,32 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/settings/test/llm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Test Llm Endpoint
+         * @description Exercise the saved LLM settings once (admin only).
+         *
+         *     Sends a one-word text completion to ``llm_base_url`` with ``llm_model``
+         *     and, when document reading is enabled, a 64×64 image to the vision model,
+         *     so an operator sees "text OK / vision OK" (or the endpoint's own error)
+         *     before uploading a real document. Reads the stored settings: the card
+         *     saves first, then tests. Writes nothing.
+         */
+        post: operations["test_llm_endpoint_api_settings_test_llm_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/settings/{key}": {
         parameters: {
             query?: never;
@@ -12664,6 +12690,46 @@ export interface components {
             max_value?: number | null;
             /** Param Key */
             param_key: string;
+        };
+        /**
+         * LlmTestResponse
+         * @description What ``POST /api/settings/test/llm`` reports (#211).
+         *
+         *     ``vision_ok`` is null when the vision check did not run, which is the case
+         *     while document reading is off; ``valid`` is the single verdict the card's
+         *     button colours on.
+         */
+        LlmTestResponse: {
+            /**
+             * Message
+             * @description A sentence for the operator, the endpoint's error included
+             */
+            message: string;
+            /**
+             * Model
+             * @description The text model that was tested
+             */
+            model: string;
+            /**
+             * Text Ok
+             * @description The text completion with llm_model succeeded
+             */
+            text_ok: boolean;
+            /**
+             * Valid
+             * @description True when every check that ran succeeded
+             */
+            valid: boolean;
+            /**
+             * Vision Model
+             * @description The vision model that was (or would be) tested
+             */
+            vision_model: string;
+            /**
+             * Vision Ok
+             * @description The vision completion succeeded; null when document reading is off
+             */
+            vision_ok?: boolean | null;
         };
         /**
          * LocationPointOut
@@ -26270,6 +26336,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["SystemInfoResponse"];
+                };
+            };
+        };
+    };
+    test_llm_endpoint_api_settings_test_llm_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LlmTestResponse"];
                 };
             };
         };
