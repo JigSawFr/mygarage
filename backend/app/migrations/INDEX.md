@@ -140,3 +140,4 @@ migrations must swallow their own operational errors.
 | `128_tax_type_codes` | Tax types become codes (#211). |
 | `129_add_vehicle_eu_fields` | **FATAL** — Add the EU registration-certificate fields on vehicles (#211). |
 | `130_recall_sources` | **FATAL** — Recall sources (#211): where a recall came from, and its own identifier. |
+| `131_insurance_eu_policy_types` | **FATAL** — European insurance formulas and the no-claims class (#211). |
